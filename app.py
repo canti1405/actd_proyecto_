@@ -3,11 +3,11 @@ from dash import html, dcc
 from dash.dependencies import Input, Output, State
 import pandas as pd
 import numpy as np
-import joblib
+from tensorflow.keras.models import load_model
 import plotly.express as px
 
-# Cargar modelo preentrenado
-modelo = joblib.load("modelo_red_neuronal.pkl")
+# Cargar modelo preentrenado en formato .h5
+modelo = load_model("modelo_red_neuronal.h5")
 
 # Columnas usadas por el modelo
 columnas_utiles = [
@@ -126,10 +126,12 @@ def predecir(n_clicks, periodo, edad, nacionalidad, depto, municipio,
             puntaje, bilingue
         ]], columns=columnas_utiles)
 
-        proba = modelo.predict_proba(datos)[0][1]
+        entrada = datos.to_numpy()
+        proba = modelo.predict(entrada)[0][0]
         return f"✅ Probabilidad estimada de ser elegible para beca: {proba*100:.2f}%"
     except Exception as e:
         return f"❌ Error al predecir: {e}"
 
 if __name__ == "__main__":
     app.run_server(debug=False, host="0.0.0.0", port=8050)
+
